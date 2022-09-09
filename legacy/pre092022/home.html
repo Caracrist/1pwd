@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+  <script type="text/javascript" src="scripts/sha3.js"></script>
+  <script type="text/javascript" src="scripts/enc-base64-min.js"></script>
+  <script type="text/javascript" src="scripts/onload.js"></script>
+  <script type="text/javascript" src="scripts/onmousedetect.js"></script>
+  <script type="text/javascript" src="scripts/getpassword.js"></script>
+  <script type="text/javascript" src="scripts/lastaction.js"></script>
+  <script type="text/javascript" src="scripts/copy.js"></script>
+  <script type="text/javascript" src="scripts/builder.js"></script>
+  <script type="text/javascript" src="scripts/manage.js"></script>
+  <script type="text/javascript" src="scripts/gen.js"></script>
+  	<script type="text/javascript">
+  		if (document.images) {
+			addOnLoad(function(){
+  				ok = new Image();
+  				no = new Image();
+  				help = new Image();
+  				warn = new Image();
+  				thanks = new Image();
+
+  				ok.src = "images/ok.png";
+  				no.src = "images/no.png";
+  				help.src = "images/help.png";
+  				warn.src = "images/warn.png";
+  				thanks.src = "images/thanks.png";
+  			});
+  		}
+		addOnLoad(function(){
+			clearOnTimeoutSet = setTimeout(clearOnTimeout, 60000);
+			document.getElementById("autoclear_cb_input").checked=true;
+			document.getElementById("clipboard_cb_input").checked=false;
+			document.getElementById("touch_copy_bug_workaround_input").checked=false;
+			Reset();
+			});
+		addOnLoad(function(){
+		    var params = new URLSearchParams(window.location.search);
+		    if (params)
+		    {
+		        var paramNames = ['domain', 'user', 'secret', 'revision'];
+		        for (var i =0; i < paramNames.length; i++)
+		        {
+		            var paramName = paramNames[i];
+		            if (params.has(paramName))
+		            {
+		                var input = document.getElementById(paramName);
+		                input.value = params.get(paramName);
+		                input.onchange();
+		            }
+		        }
+		    }
+		})
+		addOnMouseDetect(function(){
+			document.onmousedown = function(){delayTimeout();};
+		});
+		addOnMouseDetect(function(){
+   			appendLastAction("Mouse detected!");
+		});
+		addOnMouseGiveup(function(){
+   			appendLastAction("No mouse detected!");
+		});
+		addOnMouseGiveup(function(){
+			document.onmousedown = function(){delayTimeout();};
+		});
+		addOnLoad(function(){
+			var elements = document.getElementsByClassName("help");
+			for (var i in elements) {
+				if (elements[i].title)
+				{
+					elements[i].onclick = function(e) {alert(e.target.title);};
+				}
+			}
+			addOnMouseDetect(function(){
+				var elements = document.getElementsByClassName("help");
+				for (var i in elements) {
+					if (elements[i].title)
+					{
+						elements[i].onclick = null;
+					}
+				}
+			});
+		});
+		addOnLoad(function(){
+		    updateCharsLeftTotal();
+		});
+		function getUpdateDate()
+		{
+		    var dateText  = document.getElementById("update-date-span").innerText;
+		    var dateParts = dateText.split('/');
+		    return new Date(dateParts[2], dateParts[1], dateParts[0]);
+		}
+	</script>
+  <link rel="stylesheet" type="text/css" href="home-style.css"/>
+  <link rel="icon" href="favicon.ico">
+  <head>
+    <meta name="description" content="Single Password Solution">
+    <meta name="keywords" content="Password,Security,Solution,Generator,Hash,Sha3,Protection,Authentication,Manager">
+ 	<meta name="author" content="Caracrist">
+ 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.75">
+    <title>(1pwd.org) - Single Password Solution</title>
+  </head>
+  <body>
+      <div style="margin:auto">
+  <table id="menu">
+  <tr>
+  <td colspan="5"><b>Single password solution</b></td>
+  <td colspan="4" style="text-align:right"><span style="font-size:70%">Updated: <span id="update-date-span"><i style="font-size:90%">18/08/2022</i></span></span></td>
+  </tr>
+  <tr>
+  <td id="menu-main" class="menu-item selected-menu-item" onclick="selectBody(this)">MAIN</td><td class="hidden"></td>
+  <td id="menu-tools" class="menu-item" onclick="selectBody(this)">TOOLS</td><td class="hidden"></td>
+  <td id="menu-help" class="menu-item" onclick="selectBody(this)">HELP</td><td class="hidden"></td>
+  <td id="menu-about" class="menu-item" onclick="selectBody(this)">ABOUT</td><td class="hidden"></td>
+  <td id="menu-donate" class="menu-item" onclick="selectBody(this)">DONATE</td>
+  </tr></table>
+  <div id="lastaction"></div>
+  <table>
+  <tr id="autoclear_cb"><td><input id="autoclear_cb_input" type="checkbox" onclick="autoclearChanged(this);" checked="true"></input></td><td>Enable password autoclear in <span id="timeouttoclear">10</span> minutes</td><td><img src='images/help.png' class="help" title="If enabled, it will automaticaly clear all fields in a few minutes. Otherwise, anyone who gains access to your computer can steal the password using a simple JavaScript code or Developer tool available in most browsers."></img></td></tr>
+  </table>
+  <div id="body-main">
+  <table>
+  <tr id="touch_copy_bug_workaround_cb"><td><input id="touch_copy_bug_workaround_input" type="checkbox" onclick="delayTimeout();editingChanged(this);" checked="false"></input></td><td>Enable editing in generated passwords</td><td><img src='images/help.png' class="help" title="Enable edit in generated passwords. There is a bug in long touch and copy processing in all major browsers on smartphones. You can't copy from readonly text box. Workaround is to make it editable."></img></td></tr>
+  <tr id="clipboard_cb" style="visibility:hidden"><td><input id="clipboard_cb_input" type="checkbox" onclick="delayTimeout();clipboardChanged(this);" checked="false"></input></td><td>Enable copy to clipboard trick</td><td><img src='images/help.png' class="help" title="Enable a trick that allows copying password to clipbord without showing it as a clear text in your browser(for deprecated browser users). Click 'Copy' button and follow the instructions."></img></td></tr>
+  </table>
+  <br>
+  
+  <table>
+   <tr>
+   <td><button onclick="delayTimeout();Reset();">Reset All</button></td><td><div style="text-align:right"><button onclick="delayTimeout();CopyFormUrl();">Copy URL</button><img src='images/help.png' class="help" title="Create the URL with current Form autofill including: Domain, User name, Secret(if not hidden) and Revision number. Copy the URL to clipboard. Note: when used, your domain, user, revision, and secret(if included) are sent to the server. I do not collect this information, but it will appear in the hosting logs."></img></div></td><td></td>
+   </tr>
+   <tr>
+   <td>Domain</td><td><input type="text" id="domain" onKeyUp="delayTimeout();ValidateNoSpaces(this)" onchange="delayTimeout();clearPasswords();ValidateNoSpaces(this)"></input><img src='images/help.png' class="help" title="Location information, usualy the Domain. Example: 'gmail.com' for gmail account. Use same strategy for all sites, and you wont have to remember differences."></img></td><td id="domain_comment"></td>
+   </tr>
+   <tr>
+   <td>User name</td><td><input type="text" id="user" onKeyUp="delayTimeout();ValidateNoSpaces(this)" onchange="delayTimeout();clearPasswords();ValidateNoSpaces(this)"></input><img src='images/help.png' class="help" title="Account identifier for which the password is been used. Usualy, username or email."></img></td><td id="user_comment"></td>
+   </tr>
+   <tr>
+   <td>Password*</td><td><input type="password" id="password" onKeyUp="delayTimeout();ValidatePassword(false)" onchange="delayTimeout();ValidatePassword(false);clearPasswords()"></input><img src='images/help.png' class="help" title="Approximate password strength calculated in bits. Less than 60 is weak, 70 to 100 is good, more than 120 is unbreakable. Do not use words, English in particular. Mix characters from different groups: numbers, lower cased letters, upper cased letters, symbols, spaces, non Latin language(Unicode symbols)."></img></td><td id="password_comment"></td>
+   </tr>
+   <tr>
+   <td>Confirm password*</td><td><input type="password" id="password_confirm" onKeyUp="delayTimeout();ValidatePassword(true)" onchange="delayTimeout();ValidatePassword();"></input></td><td id="password_confirm_comment"></td>
+   </tr>
+   <tr>
+   <td><div style="display:flex;justify-content:space-between">Secret<script>MakeShowHide('secret');</script></div></td><td><input type="text" id="secret" onKeyUp="delayTimeout();" onchange="delayTimeout();clearPasswords()"></input><img src='images/help.png' class="help" title="Secret sentence you can use, and will have to remember. Can significantly increase the protection. In general, apply some sort of transformation on whatever fieldset. Example: type the domain name in reverse."></img></td><td id="hint_comment"></td>
+   </tr>
+   <tr>
+   <td>Revision number</td><td><input type="text" id="revision" value="1" onKeyUp="delayTimeout();ValidateRevision(this)" onchange="delayTimeout();ValidateRevision(this);clearPasswords()"></input><img src='images/help.png' class="help" title="Sequential number for the same location and user. If Password expired, you increment the Revision number and use the next generated Password. You must remember this number if changed (not 1)."></img></td><td id="hint_comment"></td>
+   </tr>
+ </table>
+ <div id="output" style="display:none">
+    <br><br>
+    <span>Generate passwords:</span>&nbsp;<button onclick="clearPasswords()">Clear</button>
+    <br><br>
+    <table>
+    <tr><td>Policy<img src='images/help.png' class="help" title="Policy password has approximate complexity of 80 bit and complies with the following policies: at least one capital letter, at least one small letter, at least one number, at least one symbol and no repeated same characters. Confusing characters such as '0' and 'O', 'I' and 'l' are not used for easier manual typing."></img>
+    <select id="policyPwdLengthOption"><option>8</option><option>12</option><option selected="selected">16</option><option>32</option><option>64</option></select></td>
+                        <td><script>MakePasswordOutput("PLCY_N", function() {return CallGetPasswordPolicy(document.getElementById("policyPwdLengthOption").value);} );</script></td></tr>
+    <tr><td>Extreme</td><td><script>MakePasswordOutput("64_40", function() {return CallGetPassword().base64.substr(0,40);} );</script></td></tr>
+    <tr><td>Standard</td><td><script>MakePasswordOutput("64_15", function() {return CallGetPassword().base64.substr(0,15);} );</script></td></tr>
+    <tr><td>Weak</td><td><script>MakePasswordOutput("64_8", function() {return CallGetPassword().base64.substr(0,8);} );</script></td></tr>
+    <tr><td>Hex standard</td><td><script>MakePasswordOutput("HEX_24", function() {return CallGetPassword().hex.substr(0,24);} );</script></td></tr>
+    <tr><td>Hex weak</td><td><script>MakePasswordOutput("HEX_10", function() {return CallGetPassword().hex.substr(0,10);} );</script></td></tr>
+    <tr><td>Pincode 6</td><td><script>MakePasswordOutput("PIN_6", function() {return CallGetPassword().num.substr(0,6);} );</script></td></tr>
+    <tr><td>Pincode 4</td><td><script>MakePasswordOutput("PIN_4", function() {return CallGetPassword().num.substr(0,4);} );</script></td></tr>
+    </table>
+ </div>
+ </div>
+
+ <div id="body-tools" style="display:none">
+
+ 
+ <h3>Feedback</h3>
+ <div class="paragraph-text">
+ Submit feedback with simple form:<br>
+ <span style="font-size:70%"> (<span id="chars-left-total"></span> bytes left)</span>
+ <br>
+ <table>
+     <tr><td>Text:</td><td colspan="2"><textarea maxlength="3000" id="feedback-text" cols="30" rows="8" onChange="updateCharsLeftTotal()" onKeyUp="updateCharsLeftTotal()"></textarea></td></tr>
+     <tr><td>Email:</td><td><input maxlength="100" type="text" id="feedback-email" onChange="updateCharsLeftTotal()" onKeyUp="updateCharsLeftTotal()"></input></td><td><button id="feedback-send-button" onclick="sendFeedback()" disabled="true">Send</button></td></tr>
+ </table>
+ </div>
+ <h3>Site backup</h3> 
+ <div class="paragraph-text">
+ Download all site in <a href="files/1pwd-org-by-caracrist.zip">Zip File</a>
+ </div>
+ </div>
+
+ <div id="body-help" style="display:none;width:400px">
+ <br>
+ <b>Remember only one password, generate a different password for each site.</b>
+
+ <h3>How to use</h3>
+ <div class="paragraph-text">
+ Type in the Domain name of the site asking for login. Avoid using spaces or other unseen characters,
+ mixing Upper and lowercase letters, unless you can repeat it next time for sure.
+ <br><br>
+ Type User name or Nickname if used for identification on that site. Avoid using spaces and mixed casing as well.
+ <br><br>
+ Type your Master Password and password confirmation. This must be a very strong password.
+ Its strength determines the strength of all other generated passwords. Feel free to use something complex.
+ While typing it frequently, several times a day, you will easily remember it.
+ <br><br>
+ In case you are not satisfied with just a constant sequence and wish enormously increase your passwords protection,
+ there is a Secret field for the sake of your imagination. Leave it empty unless you are absolutely sure about how to use it,
+ and what are you going to do and remember about it.
+ <br><br>
+ Some sites are invalidating passwords after some period. For such cases, there is a Revision number field.
+ Simply increment revisions number to get the next password for that site. Remember what revision is used for each site. 
+ Consider creating a URL with the form content auto-fill.
+ <br>
+ </div>
+ <h3>How it works</h3>
+ 
+ <div class="paragraph-text">
+ There is a form. If you fill it each time with exactly the same data, it will generate the same set of passwords.
+ The form contains: password, salt and instruction for hashing process. The output is Base64/Hex/Numeric/(Special in Policy) result from SHA3 hashing algorithm.
+ <br><br>
+ For example: <a href="?domain=1pwd.org&user=guest&secret=1pwd" target="_blank">Form auto-fill URL</a>
+ <br><br>
+ <b>Domain</b>: 1pwd.org
+ <br>
+ <b>User name</b>: guest
+ <br>
+ <b>Password/Confirm</b>: qwerty-is-a-bad-password?never-use-it
+ <br>
+ <b>Secret</b>: 1pwd
+ <br>
+ <b>Revision</b>: 1
+ <br><br>
+ The generated Standard password will always be:<br>
+ <b>W9V3wxNsgiQ2gEu</b> (you can try it yourself)
+ <br>The generated Policy (16) password will always be:<br>
+ <b>Ha3]T7F&.u~x=A*6</b> (you can try it yourself)
+ <br><br>
+ What actually happens is the following. There is a password, salt and hashing algorithm applied on the password using the salt.
+ All these calculations are implemented in JavaScript and there is no need to send anything over the Internet. The site is never
+ accessing the internet after been loaded(page opened) once or if opened locally on the computer after downloading the site from TOOLS.
+ <br><br>
+ Each field has it's logical role:
+ <br>
+ <b>Password/Confirm password</b> - is the password.
+ <br>
+ <b>Domain</b>, <b>User name</b> and <b>Secret</b> - are used as salt.
+ <br>
+ <b>Revision</b> - changes the hashing algorithm(salt in Policy).
+ <br>
+ </div>
+ </div>
+
+ <div id="body-about" style="display:none;width:400px">
+ <h3>Updates (08/2022):</h3>
+ <ul>
+     <li>Secured transport protocol (HTTPS)</li>
+     <li>Policy password</li>
+     <li>Form auto-fill URL support</li>
+     <li>Delayed password strength and color calculation</li>
+     <li>Simple feedback form</li>
+ </ul>
+ <h4>Previous version</h4>
+ <div class="paragraph-text">
+     <a href="/legacy/pre082022/">Before 08/2022</a><br>
+ </div>
+ 
+ <h3>The philosophy</h3>
+ 
+ <div class="paragraph-text">
+ I've created this site for myself and my community. I do not put any ads on the site, since I can't trust the
+ external code they bring. This site is based on <b>Zero Trust</b> approach. The code is completely open source 
+ and can be fully downloaded by anybody for offline usage. You can also turn on the Devtools (press F12) in 
+ most browsers and verify yourself that this site sends nothing when you fill the form and generate the passwords.
+ <br><br>
+ So, your Master Password and all your generated passwords <b>never leave your browser memory</b> and therefore are as
+ secured as it's possible.
+ <br>
+ </div>
+ <h4>The problem</h4>
+ 
+ <div class="paragraph-text">
+ We often need to use passwords on many sites. Remembering more than a few is impossible. So most people end up using 
+ the same password or simple variations of one password on many sites. Many sites have poor security and there is a high
+ probability that a password used there will leak, usually together with the email address. As a result the attacker 
+ gets access to lots of your accounts by hacking only one poorly secured site. The right approach is to use different 
+ passwords on different sites and accounts. 
+ <br><br>Since it is impossible to remember so many passwords, the standard approach is to save all passwords in some document. 
+ There are various solutions to this on the market, but all of them are based on your trust in the service provider. 
+ The service provider can gain access to all your passwords, alternatively if that provider will be hacked itself all your
+ passwords will leak.
+ </div>
+ <h4>The solution</h4>
+ 
+ <div class="paragraph-text">
+ This <b>Single Password Solution</b> eliminates the need to trust anybody. No passwords are saved or even sent anywhere. They
+ can't leak by some site or storage hacking, nor by any network or Internet traffic interruption. <br>
+ Every password is generated with one of the best cryptographic hashing algorithms - SHA3. This means that if one of 
+ your passwords is leaked from a poorly secured site, no other password nor your master password will be compromised.
+ <br><br>
+ You don't even have to trust me (1pwd.org). You can download the whole site anytime and use it offline. In any case, I do not
+ collect any information about the site usage. The only info I have is the statistical data collected by the hosting (currently it's Godaddy),
+ and the server log containing last 1000 requests, which contain no information about your domains, user names or passwords.
+ Except when you use the auto-fill URL (in this case I could see the domain/user/revision/[if included, secret] information in the URL paramaters in the logs). 
+ <br><br>
+ In any case, <b>I will never see your passwords</b>.
+ <br><br>
+ I know nothing about you, my anonymous visitor. Yet, I welcome you and hope you enjoy this service as much as I and my community do.
+ <br>
+ <img src="images/thanks.png"/>
+ <br><br>
+ For thanks, bugs, features and questions,<br>
+ please contact by email: <button onclick="this.outerHTML = '<input type=\'text\' readonly=\'true\' value=\'support' + '@' + '1pwd.org\'></input>'">Show</button>
+ <br>
+ <br>
+	Site created and maintained by:
+	<br>Caracrist. <button onclick="this.outerHTML = '<input type=\'text\' readonly=\'true\' value=\'caracrist' + '@' + 'gmail.com\'></input>'">Show Email</button>
+ </div>
+ </div>
+
+ <div id="body-donate" style="display:none;width:400px">
+     
+ <div class="paragraph-text">
+     <br>
+     Thank you for hitting this tab, but there is no way to donate right now.
+     <br>
+ </div>
+ <!--br>
+ <i>Generated by combined use of <a href="http://1pwd.org/">1pwd.org</a>(<a href="http://1pwd.org/files/1pwd-by-caracrist.zip">download...</a>)<br> and <a href="http://brainwallet.org" target="blank">brainwallet.org</a>(<a href="files/brainwallet.github.com-master.zip">download...</a>)</i>
+ <br>
+ <br>
+ Bitcoin address: <a href="bitcoin:16VBiGkcNk4RZAF1RxHB1FmpJvUKJAzoyS" style="font-family:Comic Sans;font-size:80%">16VBiGkcNk4RZAF1RxHB1FmpJvUKJAzoyS</a>
+ <br>
+ <br>
+ <img src="images/donate-btc.png" width="128" height="128" alt="bitcoin donate"></img>
+ <br>
+ <br>
+ <br>
+ BitSharesX address: BTSX8EDRhuji3FZMwPWxzm3n6UypN3WdAAYYJVG545o8M2rj2bfYH4
+ <br-->
+ </div>
+ </div>
+ </body>
+</html>
