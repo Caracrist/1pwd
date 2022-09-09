@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <link rel="stylesheet" type="text/css" href="home-style.css"/>
+      <link rel="icon" href="favicon.ico">
+      <script type="text/javascript" src="scripts/sha3.js"></script>
+      <script type="text/javascript" src="scripts/enc-base64-min.js"></script>
+      <script type="text/javascript" src="scripts/onload.js"></script>
+      <script type="text/javascript" src="scripts/onmousedetect.js"></script>
+      <script type="text/javascript" src="scripts/getpassword.js"></script>
+      <script type="text/javascript" src="scripts/lastaction.js"></script>
+      <script type="text/javascript" src="scripts/copy.js"></script>
+      <script type="text/javascript" src="scripts/localstorage.js"></script>
+      <script type="text/javascript" src="scripts/builder.js"></script>
+      <script type="text/javascript" src="scripts/manage.js"></script>
+      <script type="text/javascript" src="scripts/gen.js"></script>
+  	  <script type="text/javascript">
+  		if (document.images) {
+			addOnLoad(function(){
+  				ok = new Image();
+  				no = new Image();
+  				help = new Image();
+  				warn = new Image();
+  				thanks = new Image();
+
+  				ok.src = "images/ok.png";
+  				no.src = "images/no.png";
+  				help.src = "images/help.png";
+  				warn.src = "images/warn.png";
+  				thanks.src = "images/thanks.png";
+  				if (document.cookie && document.cookie.length > 0) {
+  				    document.cookie = '';
+  				}
+  			});
+  		}
+		addOnLoad(function(){
+			clearOnTimeoutSet = setTimeout(clearOnTimeout, 60000);
+			document.getElementById("autoclear_cb_input").checked=true;
+			document.getElementById("clipboard_cb_input").checked=false;
+			document.getElementById("touch_copy_bug_workaround_input").checked=false;
+			document.getElementById("localstorage_cb_input").checked = isLocalStorageEnabled();
+			document.getElementById("localstorage_cb_input").disabled= !isLocalStorageSupported();
+			updateStorageOperationItems();
+			Reset();
+			});
+		addOnLoad(function(){
+		    var params = new URLSearchParams(window.location.search);
+		    if (params)
+		    {
+		        setupForm(params);
+		    }
+		})
+		addOnMouseDetect(function(){
+			document.onmousedown = function(){delayTimeout();};
+		});
+		addOnMouseDetect(function(){
+   			appendLastAction("Mouse detected!");
+		});
+		addOnMouseGiveup(function(){
+   			appendLastAction("No mouse detected!");
+		});
+		addOnMouseGiveup(function(){
+			document.onmousedown = function(){delayTimeout();};
+		});
+		addOnLoad(function(){
+			var elements = document.getElementsByClassName("help");
+			for (var i in elements) {
+				if (elements[i].title)
+				{
+					elements[i].onclick = function(e) {alert(e.target.title);};
+				}
+			}
+			addOnMouseDetect(function(){
+				var elements = document.getElementsByClassName("help");
+				for (var i in elements) {
+					if (elements[i].title)
+					{
+						elements[i].onclick = null;
+					}
+				}
+			});
+		});
+		addOnLoad(function(){
+		    updateCharsLeftTotal();
+		});
+		function getUpdateDate()
+		{
+		    var dateText  = document.getElementById("update-date-span").innerText;
+		    var dateParts = dateText.split('/');
+		    return new Date(dateParts[2], dateParts[1], dateParts[0]);
+		}
+	</script>
+    <meta name="description" content="Single Password Solution">
+    <meta name="keywords" content="Password,Security,Solution,Generator,Hash,Sha3,Protection,Authentication,Manager">
+ 	<meta name="author" content="Caracrist">
+ 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=0.74">
+    <title>(1pwd.org) - Single Password Solution</title>
+  </head>
+  <body>
+      <div style="margin:auto">
+  <table id="menu">
+  <tr>
+  <td colspan="5"><b>Single password solution</b></td>
+  <td colspan="4" style="text-align:right"><span style="font-size:70%">Updated: <span id="update-date-span"><i style="font-size:90%">09/09/2022</i></span></span></td>
+  </tr>
+  <tr>
+  <td id="menu-main" class="menu-item selected-menu-item" onclick="selectBody(this)">MAIN</td><td class="hidden"></td>
+  <td id="menu-tools" class="menu-item" onclick="selectBody(this)">TOOLS</td><td class="hidden"></td>
+  <td id="menu-help" class="menu-item" onclick="selectBody(this)">HELP</td><td class="hidden"></td>
+  <td id="menu-about" class="menu-item" onclick="selectBody(this)">ABOUT</td><td class="hidden"></td>
+  <td id="menu-donate" class="menu-item" onclick="selectBody(this)">DONATE</td>
+  </tr></table>
+  <div id="lastaction"></div>
+  <table>
+  <tr id="autoclear_cb"><td><input id="autoclear_cb_input" type="checkbox" onclick="autoclearChanged(this);" checked></input></td><td>Enable password autoclear in <span id="timeouttoclear">10</span> minutes</td><td><img src='images/help.png' class="help" title="If enabled, it will automatically clear all fields in a few minutes. Otherwise, anyone who gains access to your computer can steal the password using a simple JavaScript code or Developer tool available in most browsers."></img></td></tr>
+  </table>
+  <div id="body-main">
+  <table>
+  <tr id="localstorage_cb"><td><input id="localstorage_cb_input" type="checkbox" onclick="delayTimeout();localStorageChanged(this);"></input></td><td>Enable <b>Local Storage</b> in this browser</td><td><img src='images/help.png' class="help" title="Enable the use of Local Storage for this browser. This will allow storing Revision, optionally Secret and password Type for your Domains and Users names. The storage is local in your browser."></img><img src='images/warn.png' style="visibility:hidden" onclick='AlertSelf(this)' id="localstorage_cb_warn_img"></img></td></tr>
+  <tr id="touch_copy_bug_workaround_cb"><td><input id="touch_copy_bug_workaround_input" type="checkbox" onclick="delayTimeout();editingChanged(this);"></input></td><td>Enable editing in generated passwords</td><td><img src='images/help.png' class="help" title="Enable edit in generated passwords. There is a bug in long touch and copy processing in all major browsers on smartphones. You can't copy from the read only text box. Workaround is to make it editable."></img></td></tr>
+  <tr id="clipboard_cb" style="visibility:hidden"><td><input id="clipboard_cb_input" type="checkbox" onclick="delayTimeout();clipboardChanged(this);"></input></td><td>Enable copy to clipboard trick</td><td><img src='images/help.png' class="help" title="Enable a trick that allows copying password to clipboard without showing it as a clear text in your browser(for deprecated browser users). Click the 'Copy' button and follow the instructions."></img></td></tr>
+  </table>
+  <br>
+  
+ <div id="local_storage_Load" style="display:none">
+     <button onclick="delayTimeout();backFromLocalStorage('Load', true)">Cancel / Back</button><br><br>
+     <div id="local_storage_Load_dialog">
+         <table>
+             <tr><td>Filters:</td><td><input type="text" id="local_storage_Load_domain_filter" class="local-storage-input" oninput="delayTimeout();dialogBuilder.Load()"></td><td></td><td><input type="text" id="local_storage_Load_user_filter" class="local-storage-input" oninput="delayTimeout();dialogBuilder.Load()"></td></tr>
+             <tr><td><b>Domain:</b></td><td><select id="local_storage_Load_domain_select" class="local-storage-select"></select></td><td><b>User name:</b></td><td><select id="local_storage_Load_user_select" class="local-storage-select"></select></td></tr>
+             <tr><td><b>Note:</b></td><td colspan="3"><div id="local_storage_Load_note" class="wordwrap" style="width:300px"></div></td></tr>
+         </table>
+     </div>
+     <br><button id="local_storage_Load_button" onclick="delayTimeout();localStorageLoad()">Load!</button>
+ </div>
+ <div id="local_storage_Save" style="display:none">
+     <button onclick="delayTimeout();backFromLocalStorage('Save', true)">Cancel / Back</button><br><br>
+     <div id="local_storage_Save_dialog">
+     </div> 
+     <br><button id="local_storage_Save_button"  onclick="delayTimeout();localStorageSave()">Save!</button>
+ </div>
+ <div id="local_storage_Import" style="display:none">
+     <button onclick="delayTimeout();backFromLocalStorage('Import', true)">Cancel / Back</button><br><br>
+     <div id="local_storage_Import_dialog">
+        <select id="local_storage_Import_select"><option>AUTO</option><option>JSON</option><option>CSV</option></select>
+        <br>
+        <textarea id="local_storage_Import_text" cols="50" rows="20" ondrop="delayTimeout();localStorageImportDrop(event);" oninput="delayTimeout();localStorageImportOnInput();"></textarea>
+     </div>
+     <br><button id="local_storage_Import_button" onclick="delayTimeout();localStorageImport()">Import!</button>
+ </div>
+ <div id="local_storage_Export" style="display:none">
+     <button onclick="delayTimeout();backFromLocalStorage('Export', true)">Cancel / Back</button><br><br>
+     <div id="local_storage_Export_dialog">
+        <br>
+        <table>
+            <tr><td><button id="local_storage_Save_button" onclick="delayTimeout();localStorageExport()">Export!</button><select id="local_storage_Export_select" onchange="delayTimeout();dialogBuilder.Export()"><option>JSON</option><option>CSV</option></select></td><td style="text-align:right"><button id="local_storage_Export_copy" onclick="delayTimeout();localStorageExportCopy()" disabled>Copy to Clipboard</button><button id="local_storage_Export_save" onclick="delayTimeout();localStorageExportSave()" disabled>Save as File</button></td></tr>
+            <tr><td colspan="2"><textarea id="local_storage_Export_text" cols="50" rows="20" readonly></textarea></td></tr>
+            <tr><td colspan="2"><input type="checkbox" id="local_storage_Export_url"> Include generated URL for each entry.</td></tr>
+        </table>
+     </div>
+ </div>
+ <div id="local_storage_Manage" style="display:none">
+     <button onclick="delayTimeout();backFromLocalStorage('Manage', true)">Cancel / Back</button><br><br>
+     <div id="local_storage_Manage_dialog">
+        <table> 
+            <tr><td>Domain</td><td>User</td></tr>
+            <tr><td><input style="width:180px" type="text" id="local_storage_Manage_domain_filter" oninput="delayTimeout();dialogBuilder.Manage()"></td><td><input style="width:180px" type="text" id="local_storage_Manage_user_filter" oninput="delayTimeout();dialogBuilder.Manage()"></td></tr>
+            <tr><td><select style="width:188px" size="10" id="local_storage_Manage_domain_select"></select></td><td><select style="width:188px" size="10" id="local_storage_Manage_user_select"></select></td></tr>
+            <tr><td><b>Note: </b><button id="local_storage_Manage_note_button" onclick="delayTimeout();localStorageManageNote(this)">Edit</button></td><td id="local_storage_Manage_modified" style="text-align:right;font-size:70%"></td></tr>
+            <tr><td colspan="2"><div id="local_storage_Manage_note" class="wordwrap" style="width:300px"></div></td></tr>
+            <tr><td><br><button id="local_storage_Manage_delete_domain" onclick="delayTimeout();localStorageDeleteDomain()">Delete Domain!</button></td><td><br><button id="local_storage_Manage_delete_user" onclick="delayTimeout();localStorageDeleteUser()">Delete User!</button></td></tr>
+        </table>
+        <br><br>
+        <button id="local_storage_Manage_clear" onclick="delayTimeout();localStorageManageClear()">Clear Local Storage</button>
+     </div>
+ </div>
+ <div id="form">
+  <table>
+   <tr>
+   <td><button onclick="delayTimeout();stopGeneratePasswords();Reset();">Reset All</button></td><td><div style="text-align:right"><button onclick="delayTimeout();CopyFormUrl();">Copy URL</button><img src='images/help.png' class="help" title="Create the URL with current Form autofill including: Domain, User name, Secret(if not hidden) and Revision number. Copy the URL to clipboard. Note: when used, your domain, user, revision, and secret(if included) are sent to the server. I do not collect this information, but it will appear in the hosting logs."></img></div></td><td></td>
+   </tr>
+   <tr>
+   <td>Domain</td><td><input type="text" id="domain" onKeyUp="delayTimeout();ValidateNoSpaces(this)" onchange="delayTimeout();clearPasswords();ValidateNoSpaces(this)"></input><img src='images/help.png' class="help" title="Location information, usually the Domain. Example: 'gmail.com' for gmail account. Use the same strategy for all sites, and you won't have to remember differences."></img></td><td id="domain_comment"></td>
+   </tr>
+   <tr>
+   <td>User name</td><td><input type="text" id="user" onKeyUp="delayTimeout();ValidateNoSpaces(this)" onchange="delayTimeout();clearPasswords();ValidateNoSpaces(this)"></input><img src='images/help.png' class="help" title="Account identifier for which the password is being used. Usually, username or email."></img></td><td id="user_comment"></td>
+   </tr>
+   <tr>
+   <td>Password*</td><td><input type="password" id="password" onKeyUp="delayTimeout();ValidatePassword(false)" onchange="delayTimeout();ValidatePassword(false);clearPasswords()"></input><img src='images/help.png' class="help" title="Approximate password strength calculated in bits. Less than 60 is weak, 70 to 100 is good, more than 120 is unbreakable. Do not use words, English in particular. Mix characters from different groups: numbers, lowercase letters, uppercase letters, symbols, spaces, non Latin language(Unicode symbols)."></img></td><td id="password_comment"></td>
+   </tr>
+   <tr>
+   <td>Confirm password*</td><td><input type="password" id="password_confirm" onKeyUp="delayTimeout();ValidatePassword(true)" onchange="delayTimeout();ValidatePassword();"></input></td><td id="password_confirm_comment"></td>
+   </tr>
+   <tr>
+   <td><div style="display:flex;justify-content:space-between">Secret<script>MakeShowHide('secret');</script></div></td><td><input type="text" id="secret" onKeyUp="delayTimeout();" onchange="delayTimeout();clearPasswords()"></input><img src='images/help.png' class="help" title="Secret sentence you can use, and will have to remember. Can significantly increase the protection. In general, apply some sort of transformation on whatever fieldset. Example: type the domain name in reverse."></img></td><td id="hint_comment"></td>
+   </tr>
+   <tr>
+   <td>Revision number</td><td><input type="text" id="revision" value="1" onKeyUp="delayTimeout();ValidateRevision(this)" onchange="delayTimeout();ValidateRevision(this);clearPasswords()"></input><img src='images/help.png' class="help" title="Sequential number for the same location and user. If Password expired, you increment the Revision number and use the next generated Password. You must remember this number if changed (not 1)."></img></td><td id="hint_comment"></td>
+   </tr>
+   <tr>
+   <td><b>Local Storage</b></td><td><select id="local_storage_operation_select" onchange="delayTimeout();localStorageOperationChange()"><option>Load</option><option>Save</option><option>Export</option><option>Import</option><option>Manage</option></select><button id="local_storage_operation_button" class="local-storage-operation-button-class" onclick="localStorageOperation(this)">Load</button></td><td id="hint_comment"></td>
+   </tr>
+ </table>
+ 
+ <div id="output" style="display:none">
+    <br><br>
+    <span>Generate passwords:</span>&nbsp;<button onclick="delayTimeout();stopGeneratePasswords()">Clear</button>
+    <br><br>
+    <table>
+    <tr><td>Policy<img src='images/help.png' class="help" title="Policy password has approximate complexity of 80 bit and complies with the following policies: at least one capital letter, at least one small letter, at least one number, at least one symbol and no repeated same characters. Confusing characters such as '0' and 'O', 'I' and 'l' are not used for easier manual typing."></img>
+    <select id="policyPwdLengthOption" onchange="GeneratePasswords()"><option>8</option><option>12</option><option selected="selected">16</option><option>32</option><option>64</option></select></td>
+                        <td><script>MakePasswordOutput("Policy_N", function() {return CallGetPasswordPolicy(document.getElementById("policyPwdLengthOption").value);} );</script></td></tr>
+    <tr><td>Extreme</td><td><script>MakePasswordOutput("Extreme", function() {return CallGetPassword().base64.substr(0,40);} );</script></td></tr>
+    <tr><td>Standard</td><td><script>MakePasswordOutput("Standard", function() {return CallGetPassword().base64.substr(0,15);} );</script></td></tr>
+    <tr><td>Weak</td><td><script>MakePasswordOutput("Weak", function() {return CallGetPassword().base64.substr(0,8);} );</script></td></tr>
+    <tr><td>Hex standard</td><td><script>MakePasswordOutput("HexStandard", function() {return CallGetPassword().hex.substr(0,24);} );</script></td></tr>
+    <tr><td>Hex weak</td><td><script>MakePasswordOutput("HexWeak", function() {return CallGetPassword().hex.substr(0,10);} );</script></td></tr>
+    <tr><td>Pincode 6</td><td><script>MakePasswordOutput("Pincode_6", function() {return CallGetPassword().num.substr(0,6);} );</script></td></tr>
+    <tr><td>Pincode 4</td><td><script>MakePasswordOutput("Pincode_4", function() {return CallGetPassword().num.substr(0,4);} );</script></td></tr>
+    </table>
+ </div>
+ </div>
+ </div>
+
+ <div id="body-tools" style="display:none">
+
+ 
+ <h3>Feedback</h3>
+ <div class="paragraph-text">
+ Submit feedback with simple form:<br>
+ <span style="font-size:70%"> (<span id="chars-left-total"></span> bytes left)</span>
+ <br>
+ <table>
+     <tr><td>Text:</td><td colspan="2"><textarea maxlength="3000" id="feedback-text" cols="30" rows="8" onChange="updateCharsLeftTotal()" onKeyUp="updateCharsLeftTotal()"></textarea></td></tr>
+     <tr><td>Email:</td><td><input maxlength="100" type="text" id="feedback-email" onChange="updateCharsLeftTotal()" onKeyUp="updateCharsLeftTotal()"></input></td><td><button id="feedback-send-button" onclick="sendFeedback()" disabled="true">Send</button></td></tr>
+ </table>
+ </div>
+ <h3>Site backup</h3> 
+ <div class="paragraph-text">
+ Download all site in <a href="files/1pwd-org-by-caracrist.zip">Zip File</a>
+ </div>
+ </div>
+
+ <div id="body-help" style="display:none;width:400px">
+ <br>
+ <b>Remember only one password, generate a different password for each site.</b>
+ <ul>
+     <li><a href="#How_to_use">How to use</a></li>
+     <li><a href="#How_it_works">How it works</a></li>
+     <li><a href="#Local_Storage">Local Storage</a></li>
+     <li><a href="#Local_Storage_Guide">Local Storage Guide</a></li>
+ </ul>
+ <h3 id="How_to_use">How to use</h3>
+ <div class="paragraph-text">
+ Type in the Domain name of the site asking for login. Avoid using spaces or other unseen characters,
+ mixing Upper and lowercase letters, unless you can repeat it next time for sure.
+ <br><br>
+ Type User name or Nickname if used for identification on that site. Avoid using spaces and mixed casing as well.
+ <br><br>
+ Type your Master Password and password confirmation. This must be a very strong password.
+ Its strength determines the strength of all other generated passwords. Feel free to use something complex.
+ While typing it frequently, several times a day, you will easily remember it.
+ <br><br>
+ In case you are not satisfied with just a constant sequence and wish enormously increase your passwords protection,
+ there is a Secret field for the sake of your imagination. Leave it empty unless you are absolutely sure about how to use it,
+ and what are you going to do and remember about it.
+ <br><br>
+ Some sites are invalidating passwords after some period. For such cases, there is a Revision number field.
+ Simply increment revisions number to get the next password for that site. Remember what revision is used for each site. 
+ Consider creating a URL with the form content auto-fill.
+ <br>
+ </div>
+ <h3 id="How_it_works">How it works</h3>
+ 
+ <div class="paragraph-text">
+ There is a form. If you fill it each time with exactly the same data, it will generate the same set of passwords.
+ The form contains: password, salt and instruction for hashing process. The output is Base64/Hex/Numeric/(Special in Policy) result from SHA3 hashing algorithm.
+ <br><br>
+ For example: <a href="?domain=1pwd.org&user=guest&secret=1pwd&generate=Policy_16%2CStandard" target="_blank">Form auto-fill URL</a>
+ <br><br>
+ <b>Domain</b>: 1pwd.org
+ <br>
+ <b>User name</b>: guest
+ <br>
+ <b>Password/Confirm</b>: qwerty-is-a-bad-password?never-use-it
+ <br>
+ <b>Secret</b>: 1pwd
+ <br>
+ <b>Revision</b>: 1
+ <br><br>
+ The generated Standard password will always be:<br>
+ <b>W9V3wxNsgiQ2gEu</b> (you can try it yourself)
+ <br>The generated Policy (16) password will always be:<br>
+ <b>Ha3]T7F&.u~x=A*6</b> (you can try it yourself)
+ <br><br>
+ What actually happens is the following. There is a password, salt and hashing algorithm applied on the password using the salt.
+ All these calculations are implemented in JavaScript and there is no need to send anything over the Internet. The site is never
+ accessing the internet after being loaded(page opened) once or if opened locally on the computer after downloading the site from TOOLS.
+ <br><br>
+ Each field has it's logical role:
+ <br>
+ <b>Password/Confirm password</b> - is the password.
+ <br>
+ <b>Domain</b>, <b>User name</b> and <b>Secret</b> - are used as salt.
+ <br>
+ <b>Revision</b> - changes the hashing algorithm(salt in Policy).
+ <br>
+ <br>
+ </div>
+ 
+ <h3 id="Local_Storage">Local Storage</h3>
+ <div class="paragraph-text">
+     For every <b>Domain</b> and <b>User name</b> there are the following things to remember: <b>Revision</b>, <b>Secret</b> and the password type to <b>Generate</b>. There are different approaches to this problem. 
+     <br><br>
+     The simplest but limited one is to always use the same Revision, same Secret logic, and Generate the same password type.
+     <br><br>
+     A much better approach is to save this information in some external location such as Notes, Online Doc file, or Paper Notebook.
+     <br><br>
+     Local Storage is a third approach. It allows you to save this information directly in your browser and use it right <b>here</b>.
+     <br>
+     Local Storage is <b>recommended</b>.
+ </div>
+<h4 id="Local_Storage_Guide">Local Storage Guide</h4>
+ <div class="paragraph-text">
+     1. Enable the local storage use by checking the box near "<i>Enable <b>Local Storage</b> in this browser</i>".
+     <br>
+     <b>Warning</b>: do not enable the Local Storage on public or temporary devices.
+     <br><br>
+     2. Fill the form with all the details for a Domain and User, including password to Generate, Revision and the Secret (optional).
+     <br><br>
+     3. Choose the "Save" option in the dropbox next to <b>Local Storage</b> under revision number, and click the <b>Save</b> button.
+     <br><br>
+     4. In the save menu, review the Form details to be saved and optionally add a Note for yourself. The note is not used in password generation. It is used only for the saved forms management. Click "Save!" button to complete the operation.
+     <br><br>
+     Repeat steps 2 to 4 for every new Domain and User name.
+     <br><br>
+     5. To load a previously saved form, choose the "Load" option in the dropbox next to <b>Local Storage</b> under revision number (it is selected by default when the page is first loaded) , and click the <b>Load</b> button.
+     <br><br>
+     6. Choose the Domain, you can use filters to find one faster if there are too many.
+     <br><br>
+     7. Choose the User (it will show only those in the selected Domain), you can use filters to find one faster if there are too many.
+     <br><br>
+     8. You can read the Note that was added when you saved this Domain/User form, and then click "Load!" button.
+     <br><br>
+     9. After loading a form, everything will be ready, put your master password and confirm it and the password you've used there will be instantly generated.
+     <br><br>
+     10. You can override an existing form details at any time by simply saving it again: repeat steps 2 to 4.
+     <br><br>
+     11. After modifying the Local Storage by adding new or overriding an existing Form it is strongly recommended to Export the information for the following two reasons:
+     <br><br>
+     &nbsp;11.A. To transfer this to an additional browser. You are probably using 1pwd.org from multiple common places such as mobile devices, home and office computers. In order to share the newly saved or updated Form with other Devices you must Export it in a form of file or text, and then import it on the other device.
+     <br><br>
+     &nbsp;11.B. To backup or view with other tools. It is recommended to save the forms information in some backup location (Drive, Email, Message, Notes, etc...). So if your browser gets reset or kaput, you will not lose the Forms data.
+     <br><br>
+     12. Choose the "Export" option in the dropbox next to <b>Local Storage</b> under revision number, and click the <b>Export</b> button.
+     <br><br>
+     13. Select a format to export the Forms and click the "Export!" button. JSON is more readable, while CSV is supported by many applications such as Excel and Google Sheets.
+     <br><br>
+     14. The text including all the data stored in your browser Local Storage will be generated in the textbox. You can review the content and perform one of the following:
+     <br><br>
+     &nbsp;14.A. Copy the text manually. 
+     <br><br>
+     &nbsp;14.B. Copy the text by clicking the "Copy to Clipboard" button. 
+     <br><br>
+     &nbsp;14.C. Download this text as a file by clicking the "Save as File" button. This file could be opened in the right application on your computer or mobile device. It will not harm, it's just a text with your information.
+     <br>
+     &nbsp;Note: this doesn't work as of 09/09/2022 in some browsers, including DuckDuckGo on mobile devices.
+     <br><br>
+     15. In order to import previously exported Forms info choose the "Import" option in the dropbox next to <b>Local Storage</b> under revision number, and click the <b>Import</b> button.
+     <br><br>
+     16. You can choose the import data format explicitly, but it is recommended to leave the "AUTO" option. There are two options to import:
+     <br><br>
+     &nbsp;16.A. Paste the previously exported text from clipboard.
+     <br><br>
+     &nbsp;16.B. Drag and drop a previously downloaded file to the text box. It will automatically fill it with the text from that file.
+     <br><br>
+     17. When the text is ready, click the "Import!" button to complete the operation. Only the Domains and User names in this text will be added or modified. No other data will be changed nor removed.
+     <br><br>
+     18. In order to change Notes or Delete entries there is an option called "Manage". Choose the "Manage" option in the dropbox next to <b>Local Storage</b> under revision number, and click the <b>Manage</b> button.
+     <br><br>
+     19. Select a Domain and/or User name with the help of filers the same way as in steps 6 and 7.
+     <br><br>
+     20. You can edit the Note of the selected Domain and User by:
+     <br><br>
+     &nbsp;20.A. Click the "Edit" button.
+     <br><br>
+     &nbsp;20.B. Modify the text in the textbox.
+     <br><br>
+     &nbsp;20.B. Click the "Save" button.
+     <br><br>
+     21. In order to delete the form info of a selected User, click the "Delete User!" button, and confirm your operation in the pop-up window.
+     <br><br>
+     22. In order to delete all the forms info of a selected Domain, click the "Delete Domain!" button, and confirm your operation in the pop-up window.
+     <br><br>
+     23. When you decide to clear all Local Storage info for all Domains and all Users in this browser, click the "Clear Local Storage" button, and confirm your operation in the pop-up window.
+     <br><br>
+     <a href="#menu">Back to Menu</a>
+ </div>
+ </div>
+
+ <div id="body-about" style="display:none;width:400px">
+ <h3>Updates (09/2022):</h3>
+ <ul>
+     <li>Local Storage support</li>
+     <li>Generated passwords - generate / cancel</li>
+     <li>Bugfix in copy-to-clipboard with successive spaces</li>
+     <li>UX improvements</li>
+     <li>Clear cookies injected by Microsoft AWS</li>
+ </ul>
+ <h4>Previous versions</h4>
+ <div class="paragraph-text">
+     <a href="/legacy/pre092022/">Before 09/2022</a><br>
+     <a href="/legacy/pre082022/">Before 08/2022</a><br>
+ </div>
+ 
+ <h3>The philosophy</h3>
+ 
+ <div class="paragraph-text">
+ I've created this site for myself and my community. I do not put any ads on the site, since I can't trust the
+ external code they bring. This site is based on <b>Zero Trust</b> approach. The code is completely open source 
+ and can be fully downloaded by anybody for offline usage. You can also turn on the Devtools (press F12) in 
+ most browsers and verify yourself that this site sends nothing when you fill the form and generate the passwords.
+ <br><br>
+ So, your Master Password and all your generated passwords <b>never leave your browser memory</b> and therefore are as
+ secured as it's possible.
+ <br>
+ </div>
+ <h4>The problem</h4>
+ 
+ <div class="paragraph-text">
+ We often need to use passwords on many sites. Remembering more than a few is impossible. So most people end up using 
+ the same password or simple variations of one password on many sites. Many sites have poor security and there is a high
+ probability that a password used there will leak, usually together with the email address. As a result the attacker 
+ gets access to lots of your accounts by hacking only one poorly secured site. The right approach is to use different 
+ passwords on different sites and accounts. 
+ <br><br>Since it is impossible to remember so many passwords, the standard approach is to save all passwords in some document. 
+ There are various solutions to this on the market, but all of them are based on your trust in the service provider. 
+ The service provider can gain access to all your passwords, alternatively if that provider will be hacked itself all your
+ passwords will leak.
+ </div>
+ <h4>The solution</h4>
+ 
+ <div class="paragraph-text">
+ This <b>Single Password Solution</b> eliminates the need to trust anybody. No passwords are saved or even sent anywhere. They
+ can't leak by some site or storage hacking, nor by any network or Internet traffic interruption. <br>
+ Every password is generated with one of the best cryptographic hashing algorithms - SHA3. This means that if some of 
+ your passwords are leaked from a poorly secured site, no other passwords nor your master password will be compromised.
+ <br><br>
+ You don't even have to trust me (1pwd.org). You can download the whole site anytime and use it offline. In any case, I do not
+ collect any information about the site usage. The only info I have is the statistical data collected by the hosting (currently it's Godaddy),
+ and the server log containing the last 1000 requests, which contain no information about your domains, usernames or passwords.
+ Except when you use the auto-fill URL (in this case I could see the domain/user/revision/[if included, secret] information in the URL parameters in the logs). 
+ <br><br>
+ In any case, <b>Nobody will ever see your passwords</b>.
+ <br><br>
+ I know nothing about you, my anonymous visitor. Yet, I welcome you and hope you enjoy this service as much as I and my community do.
+ <br>
+ <img src="images/thanks.png"/>
+ <br><br>
+ For thanks, bugs, features and questions,<br>
+ please contact by email: <button onclick="this.outerHTML = '<b>support' + '@' + '1pwd.org</b>'">Show</button>
+ <br>
+ <br>
+	Site created and maintained by:
+	<br>Caracrist. <button onclick="this.outerHTML = '<b>caracrist' + '@' + 'gmail.com</b>'">Show Email</button>
+ </div>
+ </div>
+
+ <div id="body-donate" style="display:none;width:400px">
+     
+ <div class="paragraph-text">
+     <br>
+     Thank you for hitting this tab, but there is no way to donate right now.
+     <br>
+ </div>
+ <!--br>
+ <i>Generated by combined use of <a href="http://1pwd.org/">1pwd.org</a>(<a href="http://1pwd.org/files/1pwd-by-caracrist.zip">download...</a>)<br> and <a href="http://brainwallet.org" target="blank">brainwallet.org</a>(<a href="files/brainwallet.github.com-master.zip">download...</a>)</i>
+ <br>
+ <br>
+ Bitcoin address: <a href="bitcoin:16VBiGkcNk4RZAF1RxHB1FmpJvUKJAzoyS" style="font-family:Comic Sans;font-size:80%">16VBiGkcNk4RZAF1RxHB1FmpJvUKJAzoyS</a>
+ <br>
+ <br>
+ <img src="images/donate-btc.png" width="128" height="128" alt="bitcoin donate"></img>
+ <br>
+ <br>
+ <br>
+ BitSharesX address: BTSX8EDRhuji3FZMwPWxzm3n6UypN3WdAAYYJVG545o8M2rj2bfYH4
+ <br-->
+ </div>
+ </div>
+ </body>
+</html>

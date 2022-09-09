@@ -1,0 +1,85 @@
+html {
+  scroll-behavior: smooth;
+}
+.wordwrap { 
+   white-space: pre-wrap;      /* CSS3 */   
+   white-space: -moz-pre-wrap; /* Firefox */    
+   white-space: -pre-wrap;     /* Opera <7 */   
+   white-space: -o-pre-wrap;   /* Opera 7 */    
+   word-wrap: break-word;      /* IE */
+}
+.warning {
+color: red;
+font-size: 20px;
+}
+.clipboard-trick {
+visibility:hidden;
+}
+input.password-output {
+    padding: 0px;
+    width: 140px;
+}
+button {
+margin-right:3px;
+}
+button.show_hide_button {
+width: 50px;
+}
+button.generate-button {
+width: 75px;
+}
+button.local-storage-operation-button-class {
+width: 65px;
+margin-left: 10px;
+}
+.help {
+cursor:help
+}
+#lastaction {
+height:15px;
+font-size: 12px;
+font-style:italic;
+padding-bottom: 5px;
+}
+.paragraph-text {
+margin-left: 3px;
+}
+#menu td.hidden {
+padding-right: 5px;
+padding-left: 5px;
+background-color:gray;
+}
+#menu td.menu-item {
+text-align:center;
+font-size: 100%;
+padding-right: 5px;
+padding-left: 5px;
+font-weight:normal;
+cursor:context-menu;
+border:1px solid gray;
+}
+#menu td.menu-item:hover {
+text-decoration:underline;
+}
+#menu td.selected-menu-item {
+background-color:yellow;
+}
+#menu td.selected-menu-item:hover {
+text-decoration:none;
+}
+select.local-storage-select {
+    white-space: pre;
+    width: 110px;
+}
+input.local-storage-input {
+width: 102px;
+}
+textarea {
+    white-space: pre-wrap;
+}
+option {
+    white-space: pre;
+}
+select {
+    white-space: pre;
+}
