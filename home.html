@@ -15,6 +15,7 @@
       <script type="text/javascript" src="scripts/manage.js"></script>
       <script type="text/javascript" src="scripts/gen.js"></script>
   	  <script type="text/javascript">
+  	 
   		if (document.images) {
 			addOnLoad(function(){
   				ok = new Image();
@@ -49,6 +50,7 @@
 		    {
 		        setupForm(params);
 		    }
+		    
 		})
 		addOnMouseDetect(function(){
 			document.onmousedown = function(){delayTimeout();};
@@ -83,6 +85,9 @@
 		addOnLoad(function(){
 		    updateCharsLeftTotal();
 		});
+		addOnLoad(function(){
+		    detectIntervention();
+		});
 		function getUpdateDate()
 		{
 		    var dateText  = document.getElementById("update-date-span").innerText;
@@ -101,7 +106,7 @@
   <table id="menu">
   <tr>
   <td colspan="5"><b>Single password solution</b></td>
-  <td colspan="4" style="text-align:right"><span style="font-size:70%">Updated: <span id="update-date-span"><i style="font-size:90%">09/09/2022</i></span></span></td>
+  <td colspan="4" style="text-align:right"><span style="font-size:70%">Updated: <span id="update-date-span"><i style="font-size:90%">10/09/2022</i></span></span></td>
   </tr>
   <tr>
   <td id="menu-main" class="menu-item selected-menu-item" onclick="selectBody(this)">MAIN</td><td class="hidden"></td>
@@ -237,7 +242,7 @@
  </div>
  <h3>Site backup</h3> 
  <div class="paragraph-text">
- Download all site in <a href="files/1pwd-org-by-caracrist.zip">Zip File</a>
+ Download all site in a <a href="download.php">Zip file</a>.
  </div>
  </div>
 
