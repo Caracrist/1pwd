@@ -28,7 +28,8 @@ panic = function (message) {
     var body = document.getElementsByTagName('body')[0];
     body.className = 'panic-class';
     var pathname = (document.location.protocol == 'file:') ? '' : document.location.pathname;
-    body.innerHTML = 'Error!!!<br><br>' + message + '<br><br>Disable the translation or other page modifiers and reload it from <a href="https://1pwd.org'+pathname+'">https://1pwd.org'+pathname+'</a>';
+    body.innerHTML = 'Error!!!<br><br>' + message + '<br><br>Disable the translation or other page modifiers and reload it from <a href="https://1pwd.org'+pathname+'">https://1pwd.org'+pathname+'</a>' +
+    '<br><br>For more assistance please contact with: <b>support' + '@' + '1pwd.org</b>';
 }
 function detectIntervention() {
     if (document.location.protocol != 'file:' && document.location.protocol != 'https:' ) {
